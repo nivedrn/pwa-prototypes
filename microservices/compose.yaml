@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: microservices-client
+    image: tbs-microservices-client
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - thebookstore-microservices
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: microservices-gateway
+    image: tbs-microservices-gateway
+    restart: unless-stopped
+    env_file: ./api-gateway/.env
+    environment:
+      - API_GATEWAY_PORT=8080
+    volumes:
+      - ./api-gateway:/app
+      - /api-gateway/node_modules
+    ports:
+      - "8080:8080"
+    networks:
+      - thebookstore-microservices
+
+  product-services:
+    build:
+      context: ./product-services
+      target: final
+    container_name: product-services
+    image: tbs-microservices-productservices
+    restart: unless-stopped
+    volumes:
+      - ./product-services/config-docker.toml:/etc/config.toml
+    ports:
+      - "8400:8400"
+    networks:
+      - thebookstore-microservices
+
+  mongodb-gateway:
+    image: mongo
+    container_name: microservices-gatewaydb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: thebookstore
+    volumes:
+      - ./mongodb-gateway:/data/db
+    ports:
+      - "27800:27017"
+    networks:
+      - thebookstore-microservices
+  
+  mongodb-products:
+    image: mongo
+    container_name: microservices-productsdb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: thebookstore
+    volumes:
+      - ./mongodb-products:/data/db
+    ports:
+      - "27801:27017"
+    networks:
+      - thebookstore-microservices
+
+networks:
+  thebookstore-microservices:
+    name: thebookstore-microservices

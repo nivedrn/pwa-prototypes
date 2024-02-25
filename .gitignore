@@ -1,3 +1,12 @@
 pwa-demo
-
 **/node_modules/
+
+# MongoDB Docker Images
+**/mongodb.conf/
+/monolithic/mongodb-monolithic
+
+/microservices/mongodb-gateway
+/microservices/mongodb-products
+
+# Rust microservice target folder
+/microservices/product-services/target

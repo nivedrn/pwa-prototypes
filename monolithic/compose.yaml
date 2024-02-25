@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: monolithic-client
+    image: tbs-monolithic-client
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    networks:
+      - thebookstore-monolithic
+
+  mongodb:
+    image: mongo
+    container_name: monolithic-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: thebookstore
+    volumes:
+      - ./mongodb-monolithic:/data/db
+    ports:
+      - "27500:27017"
+    networks:
+      - thebookstore-monolithic
+
+networks:
+  thebookstore-monolithic:
+    name: thebookstore-monolithic

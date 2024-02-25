@@ -1,0 +1,34 @@
+services:
+  products:
+    port: 8400
+    base_url: http://product-services
+    endpoints:
+      get:
+        - list
+        - filter
+        - item/*
+      put:
+        - item/*
+      delete:
+        - item/*
+      post: 
+        - item/create
+    secret_key: mainServiceIsRestrictedOnly
+
+  auth:
+    port: 8410
+    base_url: http://0.0.0.0
+    endpoints:
+      get:
+        - list
+        - filter
+        - user/*
+      put:
+        - user/*
+      delete:
+        - user/*
+      post: 
+        - user/create
+    secret_key: mainServiceIsRestrictedOnly
+
+  
