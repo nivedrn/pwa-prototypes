@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator"
 import { useState, useEffect } from "react";
-import { fetchBooks } from '@/app/actions';
+import { fetchBooks } from '@/lib/books';
 
 import {
     Carousel,

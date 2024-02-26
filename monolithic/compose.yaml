@@ -3,10 +3,10 @@ version: "3"
 services:
   client:
     build: 
-      context: ./client
+      context: ./src
       dockerfile: Dockerfile
-    container_name: monolithic-client
-    image: tbs-monolithic-client
+    container_name: monolithic-app
+    image: tbs-monolithic-app
     restart: unless-stopped
     ports:
       - "5000:5000"
