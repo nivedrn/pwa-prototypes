@@ -10,3 +10,6 @@ pwa-demo
 
 # Rust microservice target folder
 /microservices/product-services/target
+/microservices/product-services/config.toml
+
+**/.env
