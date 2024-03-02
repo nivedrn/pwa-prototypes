@@ -49,8 +49,8 @@ export default function Home() {
                 <Separator />
 
                 {cartData && cartData.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4 ">
-                        <div className="col-span-1 md:col-span-1 m-5">
+                    <div className="grid grid-cols-3 gap-4 ">
+                        <div className="col-span-3 md:col-span-2 m-5">
                             <Table>
                                 <TableCaption>A list of all items in your cart.</TableCaption>
                                 <TableHeader>
@@ -73,7 +73,7 @@ export default function Home() {
                                 </TableBody>
                             </Table>
                         </div>
-                        <div className="col-span-1 md:col-span-1 flex flex-col items-center">
+                        <div className="col-span-3 md:col-span-1 flex flex-col items-center">
                             <Card className="w-full my-5 bg-slate-50">
                                 <CardHeader>
                                     <CardTitle className="text-xl">Order Summary&nbsp;({cartData.length} {cartData.length > 1 ? "items" : "item"}):</CardTitle>

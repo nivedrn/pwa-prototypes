@@ -26,9 +26,7 @@ import {
     ShoppingCart,
     Bookmark,
     ArrowRight,
-    X,
-    PackageOpen,
-    LogOut
+    X
 } from "lucide-react"
 
 export const Icons = {
@@ -57,8 +55,5 @@ export const Icons = {
     cart: ShoppingCart,
     wishlist: Bookmark,
     arrowRight: ArrowRight,
-    cross:X,
-    orders: PackageOpen,
-    logout: LogOut
-
+    cross:X
 }

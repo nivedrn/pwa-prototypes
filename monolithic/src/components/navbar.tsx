@@ -30,6 +30,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
+import { fetchUserSession, userLogout } from "@/lib/auth";
+import { useAppStore } from "@/state/appState";
 
 interface Props {
     mode: string;
@@ -37,10 +39,21 @@ interface Props {
 
 export default function Navbar(props: Props) {
     const router = useRouter();
+    const { currentUser, setCurrentUser } = useAppStore();
     const [navClassOnScroll, setNavClassOnScroll] = useState<string>("bg-orange-50");
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
+
+        const updateSession = async () => {
+            const session = await fetchUserSession();
+            if(session != null){
+                setCurrentUser({email: session.email, name: session.name});
+            }
+            console.log(session);
+        }
+
+        updateSession();
 
         const handleScroll = () => {
             if (typeof window !== "undefined" && window.scrollY > 1) {
@@ -105,7 +118,7 @@ export default function Navbar(props: Props) {
                 </div>
                 <div className="flex items-center justify-end col-span-2 md:space-x-3">
                     <div className="hidden md:flex items-center space-x-2 max-h-[30px] my-3">
-                        <Input type="text" className="min-w-80" placeholder="Search by book title, author ..." value={searchTerm} onChange={handleInputChange}/>
+                        <Input type="text" className="min-w-80" placeholder="Search by book title, author ..." value={searchTerm} onChange={handleInputChange} />
                         <Button className="px-3 py-2" onClick={searchStore}>
                             <Icons.search className="flex h-5 w-5 opacity-75 hover:opacity-95" />
                         </Button>
@@ -134,20 +147,20 @@ export default function Navbar(props: Props) {
                                     <Icons.profile className="mx-auto h-6 w-6 opacity-55 group-hover:opacity-95" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 mr-5">
-                                <DropdownMenuLabel className="text-gray-400">Profile</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/profile"); }}>Edit Profile</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/projects"); }}>My Orders</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/raw"); }}>Raw Json</DropdownMenuItem>
+                            <DropdownMenuContent className="w-56 mr-5 justify-end">
+                                <DropdownMenuLabel className="text-gray-400">
+                                    <div className="text-xl">{currentUser?.name}</div>
+                                    {currentUser?.email}
+                                </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel className="text-gray-400">Navigate To</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/profile"); }}>Edit Profile</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/projects"); }}>My Orders</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { router.push("/editor/raw"); }}>Raw Json</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/cart"); }}><Icons.cart className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Shopping Cart</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/wishlist"); }}><Icons.wishlist className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />My Wishlist</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { router.push("/editor/settings"); }}>Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/profile"); }}><Icons.settings className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Edit Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/orders"); }}><Icons.orders className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />My Orders</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { router.push("/editor/settings"); }}>Logout</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { userLogout(); router.push("/"); }}><Icons.logout className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Logout</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

@@ -54,20 +54,19 @@ export default function Booktile(props: Props) {
         <>
             {(mode == "book" ? (
                 <>{(book != null && (
-                    <div className="flex flex-col w-[180px] h-[255px] md:w-[180px] md:h-[330px] border rounded-lg bg-card shadow">
+                    <div className="flex flex-col w-[180px] h-[255px] md:w-[180px] md:h-[340px] border rounded-lg bg-card shadow">
                         <Link href={`/book/${book.isbn}`}>
                             <div className="flex justify-center items-center">
                                 <Image
-                                    src={book.thumbnail_url ?? "../public/next.svg" }
+                                    src={book.thumbnail_url}
                                     alt={book.title}
                                     width="200"
                                     height="200"
                                     className="rounded-lg w-[120px] h-[160px] md:w-[180px] md:h-[240px]"
-                                    
                                 />
                             </div>
                             <Separator />
-                            <p className="px-2 pt-2 line-clamp-2 text-sm font-semibold h-[52px]">{book.title}</p>
+                            <p className="p-2 line-clamp-2 text-sm font-semibold h-[60px]">{book.title}</p>
                         </Link>
                         <div className="flex w-full justify-between items-center px-2">
                             <div className="text-sm">{currencySymbol} {book.price ? book.price : 15.00 }</div>

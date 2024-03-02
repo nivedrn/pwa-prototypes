@@ -58,12 +58,11 @@ export default function Booktile(props: Props) {
                         <Link href={`/book/${book.isbn}`}>
                             <div className="flex justify-center items-center">
                                 <Image
-                                    src={book.thumbnail_url ?? "../public/next.svg" }
+                                    src={book.thumbnail_url}
                                     alt={book.title}
                                     width="200"
                                     height="200"
                                     className="rounded-lg w-[120px] h-[160px] md:w-[180px] md:h-[240px]"
-                                    
                                 />
                             </div>
                             <Separator />

@@ -6,6 +6,7 @@ import Booktile from "@/components/booktile";
 import { Icons } from "@/components/icons";
 import { fetchBooks, fetchGroupedBooks } from '@/lib/books';
 import Link from "next/link";
+import { fetchUserSession } from "@/lib/auth";
 
 export default function Home() {
     const { isLoading, setIsLoading } = useAppStore();
@@ -15,6 +16,7 @@ export default function Home() {
 
     useEffect(() => {
         setIsLoading(true);
+               
         const fetchData = async () => {
             const { results, error } = await fetchBooks(14);
 
@@ -78,7 +80,7 @@ export default function Home() {
                     {groupedData != null && (
                         <div className="flex flex-col gap-5 md:pt-5 justify-start overflow-x-auto">
                             {groupedData.map((item: any, index: number) => (
-                                <div className="flex flex-col w-full gap-2">
+                                <div key={index} className="flex flex-col w-full gap-2">
                                     <div className="flex w-full md:pt-5 justify-between">
                                         <span><strong>{item.category}</strong>&nbsp;books</span>
                                         <Link href={`/books?category=${item.category}`} className="hover:underline hover:text-bold">View more<Icons.arrowRight className="inline ml-2 h-4 w-4" /></Link>

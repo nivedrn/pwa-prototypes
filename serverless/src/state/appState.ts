@@ -29,11 +29,6 @@ class ShoppingCartItem implements CartItem{
     }
 }
 
-interface User{
-    name: string,
-    email: string
-}
-
 type Store = {
     isLoading: boolean
     setIsLoading: (isLoading: boolean) => void
@@ -41,8 +36,6 @@ type Store = {
     setCartData: (data: ShoppingCartItem[]) => void
     currencySymbol: string
     setCurrencySymbol: (data: string) => void
-    currentUser: User | null
-    setCurrentUser: (data: any) => void
 }
 
 const useAppStore = create<Store>()((set) => ({
@@ -52,8 +45,6 @@ const useAppStore = create<Store>()((set) => ({
     setCartData: (data) => set(() => ({ cartData: data })),
     currencySymbol: "€",
     setCurrencySymbol: (data) => set(() => ({ currencySymbol: data })),
-    currentUser: null,
-    setCurrentUser: (data) => set(() => ({ currentUser: data }))
 }));
 
 export { ShoppingCartItem, useAppStore }; 

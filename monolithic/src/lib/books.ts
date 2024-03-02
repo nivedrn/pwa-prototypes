@@ -35,9 +35,8 @@ export async function fetchGroupedBooks() {
         const client = await clientPromise;
         const db = client.db(process.env.MONGODB_NAME);
 
-        // Aggregation pipeline to group books by category and limit to 10 books per category
         const pipeline = [
-            { $unwind: "$categories" }, // Unwind the categories array
+            { $unwind: "$categories" }, 
             {
                 $group: {
                     _id: "$categories", books: {
@@ -55,13 +54,13 @@ export async function fetchGroupedBooks() {
                             thumbnail_url: "$thumbnail_url",
                             price: "$price"
                         }
-                    }, count: { $sum: 1 } // Count the number of books per category
+                    }, count: { $sum: 1 } 
                 }
             },
             {
-                $match: { count: { $gte: 5 } } // Filter out categories with less than 5 books
-            }, // Group by category and push books into an array
-            { $project: { _id: 0, category: "$_id", books: { $slice: ["$books", 10] } } } // Project to rename fields and limit books array to 10
+                $match: { count: { $gte: 5 } } 
+            }, 
+            { $project: { _id: 0, category: "$_id", books: { $slice: ["$books", 10] } } } 
         ];
 
         const groupedBooks = await db.collection("books").aggregate(pipeline).toArray();
