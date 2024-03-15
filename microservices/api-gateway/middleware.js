@@ -6,7 +6,12 @@ const router = require("express").Router();
 require("dotenv").config();
 
 router.use("/api/:path", (req, res) => {
-    console.log(`Incoming request : ${req.baseUrl}${req.path}?${new URLSearchParams(req.query)}.`);
+	console.log(
+		`Incoming request : ${req.baseUrl}${req.path}?${new URLSearchParams(
+			req.query
+		)}.`
+	);
+
 	resolveResponse(res);
 	resolveRequest(req, (request, service, error) => {
 		if (error) {
@@ -24,13 +29,17 @@ router.use("/api/:path", (req, res) => {
 			}
 			res.status(status_code).json(error);
 		} else {
-			forwardRequest(request, service)
-				.then((response) => {
-					res.json(response);
-				})
-				.catch((err) => {
-					res.status(500).json(err);
-				});
+			if (request.path == "auth") {
+                console.log("Inside Auth");
+			} else {
+				forwardRequest(request, service)
+					.then((response) => {
+						res.json(response);
+					})
+					.catch((err) => {
+						res.status(500).json(err);
+					});
+			}
 		}
 	});
 });

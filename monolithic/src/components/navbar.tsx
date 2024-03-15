@@ -44,15 +44,6 @@ export default function Navbar(props: Props) {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-
-        const updateSession = async () => {
-            const session = await fetchUserSession();
-            if(session != null){
-                setCurrentUser({email: session.email, name: session.name});
-            }
-            console.log(session);
-        }
-
         updateSession();
 
         const handleScroll = () => {
@@ -67,6 +58,13 @@ export default function Navbar(props: Props) {
         return () => window.removeEventListener("scroll", handleScroll);
 
     }, []);
+
+    const updateSession = async () => {
+        const session = await fetchUserSession();
+        if (session != null) {
+            setCurrentUser({ email: session.email, name: session.name });
+        }
+    }
 
     const searchStore = () => {
         const queryString = querystring.stringify({ search: searchTerm });
@@ -135,12 +133,14 @@ export default function Navbar(props: Props) {
                         >
                             <Icons.cart className="inline h-6 w-6 opacity-55 group-hover:opacity-95" />
                         </Link>
-                        <Button variant="ghost" size="icon" className="group hidden md:inline hover:bg-orange-200" >
-                            <Icons.wishlist className="mx-auto h-6 w-6 opacity-55 group-hover:opacity-95" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="group hidden md:inline hover:bg-orange-200" >
-                            <Icons.help className="mx-auto h-6 w-6 opacity-55 group-hover:opacity-95" />
-                        </Button>
+                        <Link href="/cart"
+                            className={cn(
+                                buttonVariants({ variant: "ghost" }),
+                                "px-2 py-2 hover:bg-orange-200 group "
+                            )}
+                        >
+                            <Icons.wishlist className="inline h-6 w-6 opacity-55 group-hover:opacity-95" />
+                        </Link>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="group hover:bg-orange-200" >
@@ -148,19 +148,38 @@ export default function Navbar(props: Props) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56 mr-5 justify-end">
-                                <DropdownMenuLabel className="text-gray-400">
-                                    <div className="text-xl">{currentUser?.name}</div>
-                                    {currentUser?.email}
-                                </DropdownMenuLabel>
+                                {currentUser?.name ? (
+                                    <>
+                                        <DropdownMenuLabel className="text-gray-400">
+                                            <div className="text-xl">{currentUser?.name}</div>
+                                            {currentUser?.email}
+                                        </DropdownMenuLabel>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link href="/auth"
+                                            className={cn(
+                                                buttonVariants({ variant: "secondary" }),
+                                                "px-2 py-2 w-full hover:bg-orange-200 group "
+                                            )}
+                                        >
+                                            Login / Register
+                                        </Link>
+                                    </>
+                                )}
                                 <DropdownMenuSeparator />
                                 <DropdownMenuLabel className="text-gray-400">Navigate To</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => { router.push("/cart"); }}><Icons.cart className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Shopping Cart</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { router.push("/wishlist"); }}><Icons.wishlist className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />My Wishlist</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { router.push("/profile"); }}><Icons.settings className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Edit Profile</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { router.push("/orders"); }}><Icons.orders className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />My Orders</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { userLogout(); router.push("/"); }}><Icons.logout className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Logout</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/profile/info"); }}><Icons.settings className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Edit Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { router.push("/profile/orders"); }}><Icons.orders className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />My Orders</DropdownMenuItem>
+                                {currentUser?.name && (
+                                    <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => { userLogout(); router.push("/"); }}><Icons.logout className="inline h-4 w-4 mr-2 opacity-55 group-hover:opacity-95" />Logout</DropdownMenuItem>
+                                    </>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

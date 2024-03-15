@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 interface CartItem{
+    id: string,
     isbn: string,
     title: string,
     qty: number,
@@ -10,13 +11,15 @@ interface CartItem{
 }
 
 class ShoppingCartItem implements CartItem{
+    id: string;
     isbn: string;
     title: string;
     qty: number;
     price: number;
     amount: number;
 
-    constructor(isbn: string, title: string, qty: number, price: number ){
+    constructor(id: string, isbn: string, title: string, qty: number, price: number ){
+        this.id = id;
         this.isbn = isbn;
         this.title = title;
         this.qty = qty;
@@ -29,6 +32,12 @@ class ShoppingCartItem implements CartItem{
     }
 }
 
+interface User{
+    name: string,
+    email: string,
+    id: string,
+}
+
 type Store = {
     isLoading: boolean
     setIsLoading: (isLoading: boolean) => void
@@ -36,6 +45,8 @@ type Store = {
     setCartData: (data: ShoppingCartItem[]) => void
     currencySymbol: string
     setCurrencySymbol: (data: string) => void
+    currentUser: User | null
+    setCurrentUser: (data: any) => void
 }
 
 const useAppStore = create<Store>()((set) => ({
@@ -45,6 +56,8 @@ const useAppStore = create<Store>()((set) => ({
     setCartData: (data) => set(() => ({ cartData: data })),
     currencySymbol: "€",
     setCurrencySymbol: (data) => set(() => ({ currencySymbol: data })),
+    currentUser: null,
+    setCurrentUser: (data) => set(() => ({ currentUser: data }))
 }));
 
 export { ShoppingCartItem, useAppStore }; 

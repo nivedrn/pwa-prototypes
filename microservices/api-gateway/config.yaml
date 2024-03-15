@@ -5,30 +5,22 @@ services:
     endpoints:
       get:
         - list
-        - filter
-        - item/*
-      put:
-        - item/*
-      delete:
+        - groupedlist
         - item/*
       post: 
         - item/create
     secret_key: mainServiceIsRestrictedOnly
 
   auth:
-    port: 8410
+    port: 8080
     base_url: http://0.0.0.0
     endpoints:
       get:
         - list
         - filter
         - user/*
-      put:
-        - user/*
-      delete:
-        - user/*
       post: 
         - user/create
     secret_key: mainServiceIsRestrictedOnly
 
-  
+   

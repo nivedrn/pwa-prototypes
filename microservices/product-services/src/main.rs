@@ -2,7 +2,7 @@ mod models;
 mod config;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use mongodb::{ bson::doc, Client, Database};
+use mongodb::{ bson::{doc, Document}, Client, Database};
 use config::Config;
 use std::error::Error;
 use serde::{Serialize,Deserialize};
@@ -19,12 +19,19 @@ struct Bookstore{
 }
 
 #[derive(Serialize)]
-struct ApiResponse {
-    data: Vec<models::books::Book>,
+struct ApiListResponse {
+    data: Vec<Document>,
     status: i32,
     total_count: u64,
     next: Option<String>,
     prev: Option<String>,
+    error: Option<String>,
+}
+
+#[derive(Serialize)]
+struct ApiResponse {
+    data: Document,
+    status: i32,
     error: Option<String>,
 }
 
@@ -51,7 +58,7 @@ async fn product_list(query: web::Query<ProductQuery>, store: web::Data<Bookstor
     };
     match queried_books {
         Ok(books) => {
-            let response = ApiResponse {
+            let response = ApiListResponse {
                 data: books,
                 status: 200,
                 total_count: total_count,
@@ -68,9 +75,48 @@ async fn product_list(query: web::Query<ProductQuery>, store: web::Data<Bookstor
     }
 }
 
-#[get("/one/{id}")]
-async fn product_one(path: web::Path<(u32,)>) -> impl Responder {
-    HttpResponse::Ok().body(format!("User detail: {}", path.into_inner().0))
+#[get("/groupedlist")]
+async fn product_groupedlist(store: web::Data<Bookstore>) -> impl Responder { 
+    let queried_books = models::books::get_grouped_books(store.db.clone()).await;
+
+    match queried_books {
+        Ok(books) => {
+            let response = ApiListResponse {
+                data: books,
+                status: 200,
+                total_count: 1,
+                next: None,
+                prev: None,
+                error: None,
+            };
+        
+            HttpResponse::Ok().json(response)
+        },
+        Err(e) => {
+            HttpResponse::InternalServerError().body(format!("Error: {}", e))
+        }
+    }
+}
+
+#[get("/item/{id}")]
+async fn product_detail(path: web::Path<(String,)>, store: web::Data<Bookstore>) -> impl Responder {
+    let book_id = path.into_inner().0;
+    let queried_books = models::books::get_book_detail(store.db.clone(), book_id.to_string()).await;
+
+    match queried_books {
+        Ok(books) => {
+            let response = ApiResponse {
+                data: books,
+                status: 200,
+                error: None,
+            };
+        
+            HttpResponse::Ok().json(response)
+        },
+        Err(e) => {
+            HttpResponse::InternalServerError().body(format!("Error: {}", e))
+        }
+    }
 }
 
 #[post("/create")]
@@ -105,7 +151,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .service(
                     web::scope("/api/products")
                     .service(product_list)
-                    .service(product_one)
+                    .service(product_groupedlist)
+                    .service(product_detail)
                     .service(product_create)
                 )
                 .service(server_up)

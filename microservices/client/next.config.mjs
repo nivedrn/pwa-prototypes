@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	redirects: async () => {
+    reactStrictMode: false,
+    redirects: async () => {
 		return [
 			{
 				source: "/api/:path*",
 				destination: process.env.API_GATEWAY_URL + "/:path*",
+				permanent: true,
+			},
+			{
+				source: "/profile",
+				destination: "/profile/info",
 				permanent: true,
 			},
 		];

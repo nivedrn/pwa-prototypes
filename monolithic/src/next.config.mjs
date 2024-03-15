@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    redirects: async () => {
+		return [
+			{
+				source: "/profile",
+				destination: "/profile/info",
+				permanent: true,
+			},
+		];
+	},
 	images: {
         remotePatterns: [
             {
@@ -9,6 +18,7 @@ const nextConfig = {
             },
           ]
 	},
+    reactStrictMode: false,
 };
 
 export default nextConfig;

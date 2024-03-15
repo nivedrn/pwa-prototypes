@@ -46,7 +46,8 @@ export async function userLogin(email: string, password: string) {
 
         const tokenData = {
             name: user.name,
-            email: user.email
+            email: user.email,
+            id: String(user._id)
         }
 
         const encryptedSessionData = await encrypt(tokenData);
@@ -57,7 +58,7 @@ export async function userLogin(email: string, password: string) {
             path: '/',
         });
 
-        return { results: { email: email, name: user.name}, error: null, status: 200 };
+        return { results: { id: user._id, email: email, name: user.name}, error: null, status: 200 };
 
     } catch (error) {
         console.log("Login action error: ", error);
@@ -78,13 +79,14 @@ export async function userSignUp(name: string, email: string, password: string) 
         const hashedPassword = await bcrypt.hash(salt + password, salt);
 
         const result: any = await db.collection("users").insertOne({ name: name, email: email, password: hashedPassword, isVerified: false, isAdmin: false, secret: salt });
-        console.log("Login action error: ", result);
+        console.log("User Sign Up Result: ", result);
         if (result.acknowledged) {
             const newUser: any = await db.collection("users").findOne({ email });
 
             const tokenData = {
                 name: newUser.name,
-                email: newUser.email
+                email: newUser.email,
+                id: String(newUser._id)
             };
 
 
@@ -96,7 +98,7 @@ export async function userSignUp(name: string, email: string, password: string) 
                 path: '/',
             });
 
-            return { results: { email: email, name: name}, error: null, status: 200 };
+            return { results: { id: newUser._id, email: email, name: name}, error: null, status: 200 };
         } else {
             return { results: null, error: "Failed to sign up user.", status: 500 };
         }

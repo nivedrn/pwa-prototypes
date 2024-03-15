@@ -8,33 +8,32 @@ import {
     Carousel,
     CarouselContent,
     CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
 } from "@/components/ui/carousel"
-import EmblaCarousel, { EmblaOptionsType } from 'embla-carousel';
 import Autoplay from "embla-carousel-autoplay"
 
 export default function StoreBanner() {
-    const router = useRouter();
     const [booksData, setBooksData] = useState<any>([]);
-    const OPTIONS: EmblaOptionsType = { loop: false };
 
     useEffect(() => {
-        fetch("/api/products/list?limit=5")
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error(res.statusText); // Handle errors
-                }
-                return res.json(); // Parse JSON response
-            })
-            .then((res) => {
-                if (res.data) {
-                    setBooksData(res.data);
-                    console.log(res);
-                }
-            })
-            .catch((err: string) => console.error(err));
-
+        const offset = Math.floor(Math.random() * 200)
+        let query = "/api/products/list?limit=5&offset=" + offset;
+        fetch(query)
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error(res.statusText); // Handle errors
+            }
+            return res.json(); // Parse JSON response
+        })
+        .then((res) => {
+            if (res.data) {
+                setBooksData(res.data);
+                console.log(res);
+            }
+            console.log(res);
+        })
+        .catch((err: string) => {
+            console.error(err)
+        });
     }, []);
     return (
         <main className=" justitfy-end min-h-[200px] sm:min-h-[370px] bg-orange-100 pt-1 mb-5 items-center" >

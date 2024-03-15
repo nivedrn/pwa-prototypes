@@ -40,6 +40,7 @@ export default function Booktile(props: Props) {
             toast("Updated cart item.");
         } else {
             const newItem = new ShoppingCartItem(
+                book.id,
                 book.isbn,
                 book.title,
                 1,

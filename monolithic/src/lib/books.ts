@@ -20,10 +20,54 @@ export async function fetchBooks(limit: number, offset: number = 0, featured: bo
                 { authors: { $elemMatch: { $regex: search, $options: 'i' } } } 
             ];
         }
-        const options = { projection: { _id: 0 }, skip: offset, limit: limit };
+        const options = { 
+            projection: {
+                id: { $toString: "$_id" },
+                title: 1,
+                isbn: 1,
+                status: 1,
+                is_featured: 1,
+                thumbnail_url: 1,
+                price: 1,
+                _id: 0
+            },
+            skip: offset, limit: limit };
         const booksData = await db.collection("books").find(query, options).toArray();
 
         return { results: booksData };
+    } catch (error) {
+        console.log('error', error);
+        return { data: null, error: 'Failed to fetch book records: ' + error };
+    }
+}
+
+export async function fetchBookDetails(bookId: string) {
+    try {
+        const client = await clientPromise;
+        const db = client.db(process.env.MONGODB_NAME);
+        const query: any = {};
+        if (bookId != "" && bookId != null) {
+            query.isbn = bookId;
+        }
+        const options = { 
+            projection: {
+                id: { $toString: "$_id" },
+                title: 1,
+                isbn: 1,
+                status: 1,
+                is_featured: 1,
+                thumbnail_url: 1,
+                short_description: 1,
+                long_description: 1,
+                authors: 1,
+                categories: 1,
+                price: 1,
+                page_count: 1,
+                _id: 0
+            } };
+        const bookData = await db.collection("books").findOne(query, options);
+
+        return { results: bookData };
     } catch (error) {
         console.log('error', error);
         return { data: null, error: 'Failed to fetch book records: ' + error };
@@ -41,16 +85,11 @@ export async function fetchGroupedBooks() {
                 $group: {
                     _id: "$categories", books: {
                         $push: {
+                            id: { $toString: "$_id" },
                             title: "$title",
                             isbn: "$isbn",
                             status: "$status",
-                            authors: "$authors",
-                            categories: "$categories",
                             is_featured: "$is_featured",
-                            long_description: "$long_description",
-                            page_count: "$page_count",
-                            published_date: "$published_date",
-                            short_description: "$short_description",
                             thumbnail_url: "$thumbnail_url",
                             price: "$price"
                         }

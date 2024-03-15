@@ -24,7 +24,11 @@ import {
     Search,
     BadgeHelp,
     ShoppingCart,
-    Bookmark
+    Bookmark,
+    ArrowRight,
+    X,
+    PackageOpen,
+    LogOut
 } from "lucide-react"
 
 export const Icons = {
@@ -51,5 +55,10 @@ export const Icons = {
     search: Search,
     help: BadgeHelp,
     cart: ShoppingCart,
-    wishlist: Bookmark
+    wishlist: Bookmark,
+    arrowRight: ArrowRight,
+    cross:X,
+    orders: PackageOpen,
+    logout: LogOut
+
 }

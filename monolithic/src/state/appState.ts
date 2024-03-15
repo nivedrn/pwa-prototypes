@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 interface CartItem{
+    id: string,
     isbn: string,
     title: string,
     qty: number,
@@ -10,13 +11,15 @@ interface CartItem{
 }
 
 class ShoppingCartItem implements CartItem{
+    id: string;
     isbn: string;
     title: string;
     qty: number;
     price: number;
     amount: number;
 
-    constructor(isbn: string, title: string, qty: number, price: number ){
+    constructor(id: string, isbn: string, title: string, qty: number, price: number ){
+        this.id = id;
         this.isbn = isbn;
         this.title = title;
         this.qty = qty;
@@ -31,7 +34,8 @@ class ShoppingCartItem implements CartItem{
 
 interface User{
     name: string,
-    email: string
+    email: string,
+    id: string,
 }
 
 type Store = {
