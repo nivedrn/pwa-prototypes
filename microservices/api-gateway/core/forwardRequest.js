@@ -33,7 +33,7 @@ function forwardRequest(request, service) {
 						},
 					})
 						.then((response) => {
-                            console.log(`For request : ${request.baseUrl}${request.path}?${new URLSearchParams(request.query)} got response : `, response);
+                            console.log(`For request : ${request.baseUrl}${request.path}?${new URLSearchParams(request.query)} got a response `);
 							resolve(response.data);
 						})
 						.catch((err) => {

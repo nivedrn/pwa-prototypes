@@ -56,7 +56,7 @@ export default function Page() {
     }, []);
 
     const initiateCheckout = async (amount: number) => {        
-        const response = await fetch("/api/createPaymentIntent", {
+        const response = await fetch("/api/payment/createpaymentintent", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

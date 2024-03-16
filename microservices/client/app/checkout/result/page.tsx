@@ -53,12 +53,34 @@ export default function Page() {
                 status: "CREATED"
             }
 
-            const { results, error} = await createOrder(JSON.stringify(orderData));
-
-            if (results != null) {
-                setOrderSaved(true);
-            } 
-            setIsLoading(false);
+            fetch("/api/orders/item/create", {
+                method: "post",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText);
+                    }
+                    return res.json();
+                })
+                .then((res) => {
+                    if (res.results) {
+                        console.log(res.results);
+                        setOrderSaved(true);
+                        setIsLoading(false);
+                    } else {
+                        console.log(res.results);
+                        return { results: null, error: "Login action error: " + res.error, status: 400 };
+                    }
+                })
+                .catch((err: string) => {
+                    console.error(err)
+                    return { results: null, error: "Sign Up action error: " + err, status: 400 };
+                });
         }
 
         if (paymentStatus == "succeeded" && orderSaved == false) {

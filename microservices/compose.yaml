@@ -43,6 +43,20 @@ services:
     networks:
       - thebookstore-microservices
 
+  order-services:
+    build:
+      context: ./order-services
+      target: final
+    container_name: order-services
+    image: tbs-microservices-orderservices
+    restart: unless-stopped
+    volumes:
+      - ./order-services/config-docker.toml:/etc/config.toml
+    ports:
+      - "8500:8500"
+    networks:
+      - thebookstore-microservices
+
   mongodb-gateway:
     image: mongo
     container_name: microservices-gatewaydb
@@ -70,6 +84,21 @@ services:
       - ./mongodb-products:/data/db
     ports:
       - "27801:27017"
+    networks:
+      - thebookstore-microservices
+
+  mongodb-orders:
+    image: mongo
+    container_name: microservices-ordersdb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: thebookstore
+    volumes:
+      - ./mongodb-orders:/data/db
+    ports:
+      - "27802:27017"
     networks:
       - thebookstore-microservices
 

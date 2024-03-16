@@ -11,16 +11,32 @@ services:
         - item/create
     secret_key: mainServiceIsRestrictedOnly
 
+  orders:
+    port: 8500
+    base_url: http://order-services
+    endpoints:
+      get:
+        - list
+        - item/*
+      post: 
+        - item/create
+    secret_key: mainServiceIsRestrictedOnly
+
   auth:
     port: 8080
     base_url: http://0.0.0.0
     endpoints:
-      get:
-        - list
-        - filter
-        - user/*
-      post: 
-        - user/create
+      post:
+        - login
+        - signup
+        - validate
     secret_key: mainServiceIsRestrictedOnly
 
+  payment:
+    port: 8080
+    base_url: http://0.0.0.0
+    endpoints:
+      post:
+        - createpaymentintent
+    secret_key: mainServiceIsRestrictedOnly
    

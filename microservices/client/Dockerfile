@@ -32,5 +32,5 @@ COPY --from=build /app/node_modules ./node_modules
 EXPOSE 8000
 
 # Define the command to start the Next.js application
-# CMD ["npm", "start"]
-CMD ["NODE_ENV=production", "node", "server.js"]
+CMD ["npm", "start"]
+# CMD ["NODE_ENV=production", "node", "server.js"]

@@ -1,39 +1,5 @@
 use mongodb::{bson::{doc, Document}, Collection, Database, options::FindOptions, error::Error};
 use futures::TryStreamExt;
-// use crate::models::authors::Author;
-
-// #[derive(Debug, Serialize, Deserialize)]
-// pub struct Book {
-//     #[serde(rename = "_id")]
-//     pub id: Option<ObjectId>, 
-//     pub title: Option<String>,
-//     pub isbn: Option<String>,
-//     pub page_count: Option<u64>,
-//     #[serde(default)]
-//     #[serde(with = "chrono_datetime_as_bson_datetime")]
-//     pub published_date: DateTime<Utc>,
-//     pub thumbnail_url: Option<String>,
-//     pub short_description: Option<String>,
-//     pub long_description: Option<String>,
-//     pub status: Option<String>,
-//     pub authors: Option<Vec<String>>,
-//     pub categories: Option<Vec<String>>,
-//     pub is_featured: Option<bool>,
-// }
-
-// impl Book {
-//     fn new() -> Self {
-//         Book {
-//             id: None,
-//             title: String::new(),
-//             isbn: String::new(),
-//             thumbnail_url: String::new(),
-//             status: String::new(),
-//             is_featured: false,
-//             // Initialize other fields as needed
-//         }
-//     }
-// }
 
 pub async fn get_books_count(db: Database) -> Result<u64, Error> {
     let collection: Collection<Document> = db.collection("books");

@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/state/appState";
-import { userLogin, userSignUp } from '@/lib/auth';
+import { userCreateSession } from '@/lib/auth';
 
 import localFont from 'next/font/local';
 const virgil = localFont({ src: '../../styles/Virgil.woff2' });
@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 export default function Login() {
     const router = useRouter();
     const { isLoading, setIsLoading, currentUser, setCurrentUser } = useAppStore();
-    const [error, setError] = useState("");
+    const [error, setError] = useState<String | null>(null);
     const [returnUrl, setReturnUrl] = useState<string>("/");
 
     useEffect(() => {
@@ -39,23 +39,44 @@ export default function Login() {
         const email: string = String(formData.get("email")) ?? "";
         const password: string = String(formData.get("password")) ?? "";
 
-        if( email != "" && password != "" ){
-            const { results, error } = await userLogin(email, password);
-
-            if (results != null) {
-                console.log("Results: ", results);
-                setCurrentUser({id: results.id, email: results.email, name: results.name});
-                setIsLoading(false);
-                router.push(returnUrl);
-            } else {
-                setError(error);
-                console.log("Error: ", error);
-            }
-    
-        }else{
+        if (email != "" && password != "") {
+            fetch("/api/auth/login", {
+                method: "post",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText); 
+                    }
+                    return res.json(); 
+                })
+                .then((res) => {
+                    if (res.results) {
+                        setCurrentUser({ id: res.results.id, email: res.results.email, name: res.results.name });
+                        userCreateSession(res.results.session);
+                        console.log(res.results);
+                        setIsLoading(false);
+                        router.push(returnUrl);
+                    } else {
+                        console.log(res.results);
+                        return { results: null, error: "Login action error: " + res.error, status: 400 };
+                    }
+                })
+                .catch((err: string) => {
+                    console.error(err)
+                    return { results: null, error: "Sign Up action error: " + err, status: 400 };
+                });
+        } else {
             setError("Missing Credentials.")
         }
-        
+
         setIsLoading(false);
     }
 
@@ -67,25 +88,45 @@ export default function Login() {
         const email: string = String(formData.get("email")) ?? "";
         const password: string = String(formData.get("password")) ?? "";
 
-        if( email != "" && password != "" ){
-            const { results, error } = await userSignUp(name, email, password);
-
-            if (results != null) {
-                console.log("Results: ", results);
-                if(results != null){
-                    setCurrentUser({id: results.id, email: results.email, name: results.name});
-                }
-                setIsLoading(false);
-                router.push(returnUrl);
-            } else {
-                setError(error);
-                console.log("Error: ", error);
-            }
-    
-        }else{
+        if (email != "" && password != "") {
+            fetch("/api/auth/signup", {
+                method: "post",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    name: name,
+                    password: password
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText); 
+                    }
+                    return res.json(); 
+                })
+                .then((res) => {
+                    if (res.results) {
+                        setCurrentUser({ id: res.results.id, email: res.results.email, name: res.results.name });
+                        userCreateSession(res.results.session);
+                        console.log(res.results);
+                        setIsLoading(false);
+                        router.push(returnUrl);
+                    } else {
+                        console.log(res.results);
+                        return { results: null, error: "Login action error: " + res.error, status: 400 };
+                    }
+                })
+                .catch((err: string) => {
+                    console.error(err)
+                    return { results: null, error: "Sign Up action error: " + err, status: 400 };
+                });
+        } else {
             setError("Missing Credentials.")
         }
-        
+
         setIsLoading(false);
     }
 
