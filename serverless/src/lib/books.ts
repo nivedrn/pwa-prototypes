@@ -72,7 +72,7 @@ export async function fetchBookDetails(bookId: string) {
         const responsePayload = JSON.parse(data);
 
         if (responsePayload.statusCode === 200) {
-            const booksData = JSON.parse(responsePayload.body[0]);
+            const booksData = JSON.parse(responsePayload.body);
             const unMarshalledData = booksData.map((item:any) => unmarshall(item));
             return { results: unMarshalledData };
         } else {

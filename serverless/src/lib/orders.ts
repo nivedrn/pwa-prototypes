@@ -1,73 +1,85 @@
-'use server'
+'use server';
+import { LambdaClient, InvokeCommand, InvokeCommandInput } from "@aws-sdk/client-lambda";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-import clientPromise from "../lib/mongodb";
+// Configure AWS credentials
+const credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    region: 'eu-central-1',
+};
 
-export async function createOrder(data: any) {
+// Create an instance of the Lambda client
+const lambdaClient = new LambdaClient(credentials);
+
+interface LambdaEvent {
+    limit: number;
+    offset?: number;
+    featured?: boolean;
+    category?: string;
+    search?: string;
+}
+export async function createOrder(orderData: any) {
     try {
-        const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_NAME);
-        const orderData = JSON.parse(data);   
-        console.log(orderData.paymentInfo);
-        const existingOrder = await db.collection("orders").findOne({ 
-            "paymentInfo.paymentIntentSecret" : orderData.paymentInfo.paymentIntentSecret, 
-            "paymentInfo.paymentIntent" : orderData.paymentInfo.paymentIntent 
-        });
+        const params: InvokeCommandInput = {
+            FunctionName: 'userSignUp', // Specify the name of your Lambda function
+            Payload: JSON.stringify({
+                orderData
+            }),
+        };
 
-        if (existingOrder) {
-            return { results: null, error: "Order Already Created.", status: 400 };
-        }
+        const { Payload } = await lambdaClient.send(new InvokeCommand(params));
 
-        const result: any = await db.collection("orders").insertOne(orderData);
-        console.log("Order creation result: ", result);
-        if (result.acknowledged) {
-            return { results: "Order Successful", error: null, status: 200 };
+        const asciiDecoder = new TextDecoder('ascii');
+        const data = asciiDecoder.decode(Payload);
+        const responsePayload = JSON.parse(data);
+
+        if (responsePayload.statusCode === 200) {
+            // User signup successful
+            return responsePayload.results; // Return user ID and email
         } else {
-            return { results: null, error: "Failed to create order.", status: 500 };
+            // Handle signup errors
+            console.error('Error invoking Lambda function:', responsePayload);
+            return { data: null, error: 'Failed to sign up user' };
         }
-
     } catch (error) {
-        console.log("Order Creation action error: ", error);
-        return { results: null, error: "Order Creation action error: " + error, status: 400 };
+        console.log('error', error);
+        return { data: null, error: 'Failed to sign up user: ' + error };
     }
 }
 
-
 export async function fetchOrders(currentUser: boolean = true, currentUserId: string | undefined, limit: number, offset: number = 0, search: string = "") {
     try {
-        const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_NAME);
-        
-        const query: any = {};
-        
-        if (search && search !== "") {
-            query.$or = [
-                { "items.title": { $regex: search, $options: 'i' } }, 
-                { "items.authors": { $elemMatch: { $regex: search, $options: 'i' } } } 
-            ];
+        // Define parameters for invoking the Lambda function
+        const params: InvokeCommandInput = {
+            FunctionName: 'fetchBooks', // Specify the name of your Lambda function
+            Payload: JSON.stringify({
+                currentUser,
+                currentUserId,
+                limit,
+                offset,
+                search,
+            }),
+        };
+
+        const { Payload } = await lambdaClient.send(new InvokeCommand(params));
+
+        const asciiDecoder = new TextDecoder('ascii');
+        const data = asciiDecoder.decode(Payload);
+        const responsePayload = JSON.parse(data);
+
+        if (responsePayload.statusCode === 200) {
+            const ordersData = JSON.parse(responsePayload.body);
+            const unMarshalledData = ordersData.map((item:any) => unmarshall(item));
+            return { results: unMarshalledData };
+        } else {
+            console.error('Error invoking Lambda function:', responsePayload);
+            return { data: null, error: 'Failed to fetch book records' };
         }
 
-        if(currentUser && currentUserId != null){
-            query.customer = currentUserId;
-        }
-
-        const options = { 
-            projection: {
-                id: { $toString: "$_id" },
-                items: 1,
-                paymentInfo: 1,
-                status: 1,
-                customerEmail: 1,
-                orderTotal: 1,
-                currencySymbol: 1,
-                _id: 0
-            },
-            skip: offset, limit: limit };
-        const ordersData = await db.collection("orders").find(query, options).toArray();
-
-        return { results: ordersData, error: null };
     } catch (error) {
         console.log('error', error);
-        return { results: null, error: 'Failed to fetch order records: ' + error };
+        return { data: null, error: 'Failed to fetch book records: ' + error };
     }
 }
 

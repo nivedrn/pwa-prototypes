@@ -1,6 +1,6 @@
 'use server'
+import { LambdaClient, InvokeCommand, InvokeCommandInput } from "@aws-sdk/client-lambda";
 
-import clientPromise from "../lib/mongodb";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
@@ -8,6 +8,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 const secretKey = process.env.TOKEN_SECRET ?? "secret";
 const key = new TextEncoder().encode(secretKey);
+
+import { unmarshall } from "@aws-sdk/util-dynamodb";
+
+// Configure AWS credentials
+const credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    region: 'eu-central-1',
+};
+
+// Create an instance of the Lambda client
+const lambdaClient = new LambdaClient(credentials);
+
+interface LambdaEvent {
+    limit: number;
+    offset?: number;
+    featured?: boolean;
+    category?: string;
+    search?: string;
+}
 
 export async function encrypt(payload: any) {
     return await new SignJWT(payload)
@@ -18,98 +38,80 @@ export async function encrypt(payload: any) {
 }
 
 export async function decrypt(input: string): Promise<any> {
-    try{
+    try {
         const { payload } = await jwtVerify(input, key, {
             algorithms: ["HS256"],
         });
         return payload;
-    }catch(error){
+    } catch (error) {
         cookies().delete('session');
         console.log("JWT Decrypt Error : " + error);
         return null;
     }
 }
 
-export async function userLogin(email: string, password: string) {
+export async function loginUser(email: string, password: string) {
     try {
-        const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_NAME);
-        const user = await db.collection("users").findOne({ email });
-        if (!user) {
-            return { results: null, error: "User not found.", status: 400 };
-        }
-
-        const validPassword = await bcrypt.compare(user.secret + password, user.password );
-        if (!validPassword) {
-            return { error: "Invalid credentials.", status: 400 };
-        }
-
-        const tokenData = {
-            name: user.name,
-            email: user.email,
-            id: String(user._id)
-        }
-
-        const encryptedSessionData = await encrypt(tokenData);
-        cookies().set('session', encryptedSessionData, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 60 * 60, // One hour
-            path: '/',
-        });
-
-        return { results: { id: user._id, email: email, name: user.name}, error: null, status: 200 };
-
+      const params: InvokeCommandInput = {
+        FunctionName: 'userLogin', // Specify the name of your Lambda function
+        Payload: JSON.stringify({
+          email,
+          password
+        }),
+      };
+  
+      const { Payload } = await lambdaClient.send(new InvokeCommand(params));
+  
+      const asciiDecoder = new TextDecoder('ascii');
+      const data = asciiDecoder.decode(Payload);
+      const responsePayload = JSON.parse(data);
+  
+      if (responsePayload.statusCode === 200) {
+        // Login successful
+        return responsePayload.results; // Return user details (ID, email, name)
+      } else {
+        // Handle login errors
+        console.error('Error invoking Lambda function:', responsePayload);
+        return { error: responsePayload.error }; // Return specific error message for user feedback (consider security implications in production)
+      }
     } catch (error) {
-        console.log("Login action error: ", error);
-        return { results: null, error: "Login action error: " + error, status: 400 };
+      console.error('error', error);
+      return { error: 'Failed to login user: ' + error }; // Generic error message for troubleshooting
     }
-}
+  }
 
 export async function userSignUp(name: string, email: string, password: string) {
     try {
-        const client = await clientPromise;
-        const db = client.db(process.env.MONGODB_NAME);
-        const user = await db.collection("users").findOne({ email });
-        if (user != null) {
-            return { results: null, error: "User with email already exists.", status: 400 };
-        }
+        const params: InvokeCommandInput = {
+            FunctionName: 'userSignUp', // Specify the name of your Lambda function
+            Payload: JSON.stringify({
+                name,
+                email,
+                password
+            }),
+        };
 
-        const salt = await bcrypt.genSalt(Number(process.env.SALT_LENGTH) ?? 10);
-        const hashedPassword = await bcrypt.hash(salt + password, salt);
+        const { Payload } = await lambdaClient.send(new InvokeCommand(params));
 
-        const result: any = await db.collection("users").insertOne({ name: name, email: email, password: hashedPassword, isVerified: false, isAdmin: false, secret: salt });
-        console.log("User Sign Up Result: ", result);
-        if (result.acknowledged) {
-            const newUser: any = await db.collection("users").findOne({ email });
+        const asciiDecoder = new TextDecoder('ascii');
+        const data = asciiDecoder.decode(Payload);
+        const responsePayload = JSON.parse(data);
 
-            const tokenData = {
-                name: newUser.name,
-                email: newUser.email,
-                id: String(newUser._id)
-            };
-
-
-            const encryptedSessionData = await encrypt(tokenData);
-            cookies().set('session', encryptedSessionData, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 60 * 60, // One hour
-                path: '/',
-            });
-
-            return { results: { id: newUser._id, email: email, name: name}, error: null, status: 200 };
+        if (responsePayload.statusCode === 200) {
+            // User signup successful
+            return responsePayload.results; // Return user ID and email
         } else {
-            return { results: null, error: "Failed to sign up user.", status: 500 };
+            // Handle signup errors
+            console.error('Error invoking Lambda function:', responsePayload);
+            return { data: null, error: 'Failed to sign up user' };
         }
-
     } catch (error) {
-        console.log("Sign Up action error: ", error);
-        return { results: null, error: "Sign Up action error: " + error, status: 400 };
+        console.log('error', error);
+        return { data: null, error: 'Failed to sign up user: ' + error };
     }
 }
 
-export async function userLogout(){
+export async function userLogout() {
     cookies().delete('session');
     return { results: "Logout Successfull", error: null, status: 200 };
 }
