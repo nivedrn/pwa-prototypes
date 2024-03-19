@@ -6,16 +6,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAppStore, ShoppingCartItem } from "@/state/appState";
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Icons } from "@/components/icons";
+import ImageWithFallback from "@/components/imageWithFallback";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -40,6 +33,7 @@ export default function Booktile(props: Props) {
             toast("Updated cart item.");
         } else {
             const newItem = new ShoppingCartItem(
+                book.id,
                 book.isbn,
                 book.title,
                 1,
@@ -55,14 +49,15 @@ export default function Booktile(props: Props) {
             {(mode == "book" ? (
                 <>{(book != null && (
                     <div className="flex flex-col w-[180px] h-[255px] md:w-[180px] md:h-[330px] border rounded-lg bg-card shadow">
-                        <Link href={`/book/${book.isbn}`}>
+                        <Link href={`/books/${book.isbn}`}>
                             <div className="flex justify-center items-center">
-                                <Image
-                                    src={book.thumbnail_url}
+                                <ImageWithFallback
+                                    src={book.thumbnail_url ?? "../public/next.svg" }
                                     alt={book.title}
                                     width="200"
                                     height="200"
                                     className="rounded-lg w-[120px] h-[160px] md:w-[180px] md:h-[240px]"
+                                    
                                 />
                             </div>
                             <Separator />

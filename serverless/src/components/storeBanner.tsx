@@ -24,13 +24,13 @@ export default function StoreBanner() {
             
             if(results != null){
                 setBooksData(results);
-                console.log("Results ", results);
             }else{
                 console.log("Error: ", error);
             }
         }
 
         fetchData();
+
     }, []);
     return (
         <main className=" justitfy-end min-h-[200px] sm:min-h-[370px] bg-orange-100 pt-1 mb-5 items-center" >

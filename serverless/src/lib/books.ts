@@ -55,6 +55,36 @@ export async function fetchBooks(limit: number, offset: number = 0, featured: bo
     }
 }
 
+export async function fetchBookDetails(bookId: string) {
+    try {
+        // Define parameters for invoking the Lambda function
+        const params: InvokeCommandInput = {
+            FunctionName: 'fetchBookDetails', // Specify the name of your Lambda function
+            Payload: JSON.stringify({
+                bookId
+            }),
+        };
+
+        const { Payload } = await lambdaClient.send(new InvokeCommand(params));
+
+        const asciiDecoder = new TextDecoder('ascii');
+        const data = asciiDecoder.decode(Payload);
+        const responsePayload = JSON.parse(data);
+
+        if (responsePayload.statusCode === 200) {
+            const booksData = JSON.parse(responsePayload.body[0]);
+            const unMarshalledData = booksData.map((item:any) => unmarshall(item));
+            return { results: unMarshalledData };
+        } else {
+            console.error('Error invoking Lambda function:', responsePayload);
+            return { data: null, error: 'Failed to fetch book records' };
+        }
+
+    } catch (error) {
+        console.log('error', error);
+        return { data: null, error: 'Failed to fetch book records: ' + error };
+    }
+}
 
 export async function fetchGroupedBooks() {
     try {

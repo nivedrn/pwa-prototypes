@@ -4,31 +4,18 @@ import { useAppStore } from "@/state/appState";
 import StoreBanner from "@/components/storeBanner";
 import Booktile from "@/components/booktile";
 import { Icons } from "@/components/icons";
-import { fetchBooks, fetchGroupedBooks } from '@/lib/books';
+import { fetchGroupedBooks } from '@/lib/books';
 import Link from "next/link";
+import FeaturedBooks from "@/components/featuredBooks";
 
 export default function Home() {
     const { isLoading, setIsLoading } = useAppStore();
-    const [data, setData] = useState<any>(null);
     const [groupedData, setGroupedData] = useState<any>(null);
     const [contentClassOnScroll, setContentClassOnScroll] = useState<string>("");
 
     useEffect(() => {
         setIsLoading(true);
-        const fetchData = async () => {
-            const { results, error } = await fetchBooks(14);
-
-            if (results != null) {
-                console.log("Results: ", results);
-                setData(results);
-                setIsLoading(false);
-            } else {
-                console.log("Error: ", error);
-            }
-        }
-
-        fetchData();
-
+               
         setIsLoading(true);
         const fetchGroupedData = async () => {
             const { results, error } = await fetchGroupedBooks();
@@ -65,15 +52,7 @@ export default function Home() {
                     <strong>Featured Books</strong>
                     <Link href="/books" className="hover:underline hover:text-bold">View all books<Icons.arrowRight className="inline ml-2 h-4 w-4" /></Link>
                 </div>
-                <div className="flex justify-start px-10">
-                    {data != null && (
-                        <div className="flex flex-wrap gap-2 md:pt-2 justify-start">
-                            {data.map((item: any, index: number) => (
-                                <Booktile key={index} book={item} mode={isLoading ? "skeleton" : "book"} />
-                            ))}
-                        </div>
-                    )}
-                </div>
+                <FeaturedBooks/>
                 <div className="flex justify-start px-5 md:px-10 mb-[15px] ">
                     {groupedData != null && (
                         <div className="flex flex-col gap-5 md:pt-5 justify-start overflow-x-auto">

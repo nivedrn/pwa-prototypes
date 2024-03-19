@@ -45,14 +45,14 @@ export default function Page() {
         setIsLoading(true);
         setListTitle("Showing all books");
         router.replace("/books");
-        fetchData(14, 0, false, "", "", true);
+        fetchData(42, 0, false, "", "", true);
     }
 
     const fetchMoreBooks = () => {
         setIsLoading(true);
         let category = getQueryParam('category');
         let search = getQueryParam('search');
-        fetchData(14, data.length, false, category, search);
+        fetchData(42, data.length, false, category, search);
     }
 
     useEffect(() => {
@@ -65,7 +65,7 @@ export default function Page() {
         if (getQueryParam('search') != "") {
             setListTitle("Showing search results for term: " + search);
         }
-        fetchData(14, 0, false, getQueryParam('category'), getQueryParam('search'));
+        fetchData(42, 0, false, getQueryParam('category'), getQueryParam('search'));
 
         const handleScroll = () => {
             if (typeof window !== "undefined" && window.scrollY > 1 && window.scrollY < 50) {
@@ -85,7 +85,7 @@ export default function Page() {
             <div className="container mt-[5px] mb-[15px] mx-auto grow rounded-lg bg-card p-2">
                 <div className="flex w-full px-10 md:pt-5 justify-between">
                     <strong className="flex items-center">{listTitle}</strong>
-                    <Button variant="secondary" className="hover:text-bold" onClick={clearFilters} >Clear Filters<Icons.cross className="inline ml-2 h-4 w-4" /></Button>
+                    { listTitle != "Showing all books"  && (<Button variant="secondary" className="hover:text-bold" onClick={clearFilters} >Clear Filters<Icons.cross className="inline ml-2 h-4 w-4" /></Button>)}
                 </div>
                 <div className="flex justify-center">
                     {data != null && (
